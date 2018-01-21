@@ -1,43 +1,52 @@
-var Express = require('express');
-var multer = require('multer');
-var bodyParser = require('body-parser');
-var app = Express();
-
+var express = require('express')
+var ws = require('ws')
+var fs = require('fs');
+var multer = require('multer'); // v1.0.5
 const http = require('http');
-app.use(bodyParser.json());
+
+var app = express()
+const path = require('path');
+
+var upload = multer(); // for parsing multipart/form-data
+
+app.use(express.static(path.join(__dirname, 'Images')));
+
+app.get('/', function (req, res) {
+   res.sendfile(__dirname + '/index.html');
+})
+app.listen(4321, function () {
+   console.log("Server started at port 4321");
+})
+
+var WebSocketServer = require('ws').Server,
+  wss = new WebSocketServer({port: 40510})
 
 
- var Storage = multer.diskStorage({
-     destination: function(req, file, callback) {
-         callback(null, "./Images");
-     },
-     filename: function(req, file, callback) {
-         callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
-     }
- });
+
+wss.on('connection', function (ws) {
+
+
+ ws.on('message', function(message) {
+  var msg = message;
+  if(true){
 
 
 
- 
-
- var upload = multer({
-     storage: Storage
- }).single("imgUploader"); //Field name and max count
+	//var base64Data = msg['data'].replace(/^data:image\/png;base64,/, "");
+    
 
 
- app.get("/", function(req, res) {
-     res.sendFile(__dirname + "/index.html");
- });
+base64Data  =   msg.replace(/^data:image\/jpeg;base64,/, "");
+base64Data  +=  base64Data.replace('+', ' ');
+binaryData  =   new Buffer(base64Data, 'base64').toString('binary');
 
 
- app.post("/api/Upload", function(req, res) {
-     upload(req, res, function(err) {
-         if (err) {
-             return res.end("Something went wrong!");
-         }
+fs.writeFile("Images/out.jpg", binaryData, "binary", function (err) {
+    // writes out file without error, but it's not a valid image
 
 
-http.get('http://127.0.0.1:5000/articles?name='+res.req.file.filename, (resp) => {
+
+http.get('http://127.0.0.1:5000/articles', (resp) => {
   let data = '';
  
   // A chunk of data has been recieved.
@@ -48,22 +57,36 @@ http.get('http://127.0.0.1:5000/articles?name='+res.req.file.filename, (resp) =>
   // The whole response has been received. Print out the result.
   resp.on('end', () => {
     
-return res.end(data);
+ws.send(data);
   });
  
 }).on("error", (err) => {
 
   console.log("Error: " + err.message);
-return res.end(err.message);
+
 });
 
-         
 
 
 
-     });
- });
 
-app.listen(2000, function(a) {
-     console.log("Listening to port 2000");
- });
+
+
+});
+
+
+
+
+
+
+
+
+
+
+    
+  }
+});
+
+
+
+})
