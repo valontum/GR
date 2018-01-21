@@ -34,7 +34,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.7
 config.gpu_options.allow_growth = True
 set_session(tf.Session(config=config))
 
-fname = '/traffic-light-detection/models/model_keras_v2.0.8_11195_16_100_1508741543103608'
+fname = 'model'
 file = open(fname + '.json', 'r')
 json_string = file.read()
 file.close()
