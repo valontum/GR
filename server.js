@@ -19,7 +19,7 @@ app.listen(4321, function () {
 })
 
 var WebSocketServer = require('ws').Server,
-  wss = new WebSocketServer({port: 40510})
+  wss = new WebSocketServer({port: 124})
 
 
 
